@@ -38,7 +38,7 @@ if (isset($_POST['delete_resource'])) {
     $sql = "DELETE FROM resources WHERE id=$id";
     $conn->query($sql);
 
-    // Reorder IDs after deletion
+    // Reorder IDs after deletion/////////////////////////////////////////////////////////////////////////////////////////
     $result = $conn->query("SELECT id FROM resources ORDER BY id ASC");
     $new_id = 1;
     while ($row = $result->fetch_assoc()) {
@@ -49,20 +49,10 @@ if (isset($_POST['delete_resource'])) {
 }
 
 // Clear All Data
-if (isset($_POST['clear_all'])) {
-    echo "<script>
-        if (confirm('Are you sure you want to clear all data?'))
-        {
-            window.location.href = 'admin.php?confirm_clear_all=true';
-        }
-        </script>";
-}
-
-if (isset($_POST['confirm_clear_all']) && $_GET['confirm_clear_all'] == 'true'){
+if (isset($_POST['clear_all'])){
     $sql = "DELETE FROM resources";
     $conn->query($sql);
-    header('Location: admin.php');
-    exit();
+
 }
 
 // Fetch all resources
@@ -98,6 +88,12 @@ $result = $conn->query("SELECT * FROM resources");
             background-color: #ddd;
         }
     </style> 
+
+<script type="text/javascript">
+    function confirmClearAll(){
+        return confirm('Are you sure you want to delete all data?')
+    }
+</script>
 </head>
 <body>
 
@@ -134,20 +130,21 @@ $result = $conn->query("SELECT * FROM resources");
             <td><?php echo $row['allocated_to']; ?></td>
             <td><?php echo $row['date_allocated']; ?></td>
             <td>
+            <form style="display:inline;" action="edit_resource.php" method="get">
+                    <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
+                    <input type="submit" value="Edit">
+                </form>
+
                 <form style="display:inline;" action="admin.php" method="post">
                     <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
                     <input type="submit" name="delete_resource" value="Delete">
-                </form>
-                <form style="display:inline;" action="edit_resource.php" method="get">
-                    <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
-                    <input type="submit" value="Edit">
                 </form>
             </td>
         </tr>
     <?php endwhile; ?>
 </table>
 
-<form action="admin.php" method="post">
+<form action="admin.php" method="post" onsubmit="return confirmClearAll()">
     <input type="submit" name="clear_all" value="Clear All">
 </form>
 
